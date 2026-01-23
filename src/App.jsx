@@ -5,6 +5,8 @@ import { OrbitControls } from '@react-three/drei'
 import './App.css'
 import SpaceScene from './components/SpaceScene'
 
+
+
 // импортируем все 27 фото как модули
 import photo1 from '/src/assets/gallery/photo1.JPG'
 import photo2 from '/src/assets/gallery/photo2.JPG'
@@ -41,6 +43,8 @@ function App() {
   const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
 
+  
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768)
@@ -51,6 +55,8 @@ function App() {
     
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  
 
   const photos = [
     { src: photo1, caption: 'Момент, когда я понял, что ты - моя судьба 💫' },
@@ -191,7 +197,7 @@ function App() {
                 <p style={{ fontSize: '0.9rem', marginTop: '1rem', opacity: 0.8 }}>
                   Лети вперед по главам, приближай планеты и рассмотри наши моменты в космосе.
                 </p>
-                <button className="planet-button" onClick={() => { setShowStart(false); setStep(0); setCurrentMessage(0); }}>
+                <button className="planet-button" onClick={() => { const a = document.getElementById('bg-audio'); if(a){ a.muted = false; a.play().catch(()=>{}); } setShowStart(false); setStep(0); setCurrentMessage(0); }}>
                   Взлететь 🚀
                 </button>
               </motion.div>

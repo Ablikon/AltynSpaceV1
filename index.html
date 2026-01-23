@@ -8,6 +8,112 @@
   </head>
   <body>
     <div id="root"></div>
+    <audio id="bg-audio" src="/song.mp3" loop preload="auto"></audio>
+    <script>
+      (function(){
+        const audio = document.getElementById('bg-audio');
+
+        function createOverlay(){
+          if(document.getElementById('enable-sound-overlay')) return document.getElementById('enable-sound-overlay')
+          const overlay = document.createElement('div');
+          overlay.id = 'enable-sound-overlay';
+          Object.assign(overlay.style, {
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#000',
+            color: '#fff',
+            zIndex: 99999,
+            cursor: 'pointer'
+          });
+          const inner = document.createElement('div');
+          inner.textContent = 'нажмите куда-нибудь, чтобы случилась магия';
+          Object.assign(inner.style, {
+            fontSize: '1.1rem',
+            textAlign: 'center',
+            padding: '1rem 1.5rem',
+            maxWidth: '90%',
+            lineHeight: '1.4',
+            fontWeight: '600'
+          })
+          overlay.appendChild(inner)
+          return overlay
+        }
+
+        async function attemptAutoplayThenPrompt(){
+          if(!audio) return;
+          audio.loop = true;
+
+          // wait until audio.src is set (React will set it). Retry a few times.
+          const waitForSrc = (retries = 10, delay = 200) => new Promise((resolve) => {
+            (function check(count){
+              if (audio.src && audio.src.length > 0) return resolve(true)
+              if (count <= 0) return resolve(false)
+              setTimeout(() => check(count - 1), delay)
+            })(retries)
+          })
+
+          const hasSrc = await waitForSrc(12, 150)
+          if (!hasSrc) {
+            // still no src — show overlay and wait for user
+            const overlay = createOverlay();
+            overlay.style.opacity = '1';
+            overlay.style.transition = 'opacity 600ms ease';
+            function enableAndRemove(){
+              audio.muted = false;
+              audio.play().catch(()=>{});
+              overlay.removeEventListener('click', enableAndRemove);
+              overlay.style.opacity = '0';
+              setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 650);
+            }
+            overlay.addEventListener('click', enableAndRemove);
+            document.body.appendChild(overlay);
+            return
+          }
+
+          try {
+            await audio.play();
+            // autoplay worked — hide overlay with fade
+            const existing = document.getElementById('enable-sound-overlay');
+            if (existing) {
+              existing.style.transition = 'opacity 600ms ease';
+              existing.style.opacity = '0';
+              setTimeout(() => { if (existing.parentNode) existing.parentNode.removeChild(existing); }, 650);
+            }
+            return;
+          } catch (err) {
+            // show overlay that hides site until user clicks
+            const overlay = createOverlay();
+            overlay.style.opacity = '1';
+            overlay.style.transition = 'opacity 600ms ease';
+            function enableAndRemove(){
+              audio.muted = false;
+              audio.play().catch(()=>{});
+              overlay.removeEventListener('click', enableAndRemove);
+              overlay.style.opacity = '0';
+              setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 650);
+            }
+            overlay.addEventListener('click', enableAndRemove);
+            document.body.appendChild(overlay);
+          }
+        }
+
+        // Show overlay immediately to meet request, but auto-hide if autoplay succeeds
+        window.addEventListener('load', () => {
+          const overlay = createOverlay();
+          overlay.style.opacity = '1';
+          overlay.style.transition = 'opacity 600ms ease';
+          document.body.appendChild(overlay);
+          // try autoplay; if succeeds overlay will fade out
+          attemptAutoplayThenPrompt();
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
