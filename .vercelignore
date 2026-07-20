@@ -1,0 +1,7 @@
+node_modules
+.git
+dist
+*.log
+# public/gallery этим сайтом не используется (фото берутся из src/assets/gallery,
+# которые бандлит Vite при сборке). Не загружаем ~111 МБ лишнего.
+public/gallery
