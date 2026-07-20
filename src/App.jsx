@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { motion, AnimatePresence } from 'framer-motion'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Loader } from '@react-three/drei'
 import './App.css'
 import SpaceScene from './components/SpaceScene'
 
@@ -162,11 +162,13 @@ function App() {
             powerPreference: 'high-performance'
           }}
         >
-          <SpaceScene
-            step={step}
-            photoGroups={photoGroups}
-            onPhotoClick={handlePhotoClick}
-          />
+          <Suspense fallback={null}>
+            <SpaceScene
+              step={step}
+              photoGroups={photoGroups}
+              onPhotoClick={handlePhotoClick}
+            />
+          </Suspense>
           <OrbitControls
             enableZoom={true}
             minDistance={isMobile ? 10 : 8}
@@ -180,6 +182,14 @@ function App() {
           />
         </Canvas>
       </div>
+
+      {/* Экран загрузки: показывает прогресс вместо чёрного, пока грузятся текстуры */}
+      <Loader
+        containerStyles={{ background: 'radial-gradient(circle at 50% 40%, #1a0b1f 0%, #000 80%)' }}
+        barStyles={{ background: '#ff6b9d' }}
+        dataStyles={{ color: '#ffd1e6', fontSize: '14px', letterSpacing: '0.05em' }}
+        dataInterpolation={(p) => `Загрузка космоса… ${p.toFixed(0)}%`}
+      />
 
       <div className="ui-overlay">
         <div style={{ marginTop: '1.5rem' }}>
